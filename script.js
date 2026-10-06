@@ -5,6 +5,7 @@
 const MODE_LABELS = { practice: "연습", speed: "스피드", hint: "힌트" };
 const ID_PREFIX = { "한국사": "history", "세계지리": "geography", "과학": "science", "예술과 문화": "arts" };
 const QUESTIONS_PER_CATEGORY = 10;
+const SPEED_SECONDS = 15;
 
 function shuffle(array, random = Math.random) {
   const copy = array.slice();
@@ -103,6 +104,11 @@ function pickHintRemovals(choices, answer, random = Math.random) {
   return shuffle(wrong, random).slice(0, 2);
 }
 
+// 1초마다 빼서 세지 않고 마감 시각과 현재 시각의 차이로 계산한다(탭이 멈춰도 밀리지 않음)
+function remainingSeconds(deadline, now) {
+  return Math.max(0, Math.ceil((deadline - now) / 1000));
+}
+
 // ===== 화면: 브라우저에서만 실행된다 =====
 
 const state = {
@@ -113,11 +119,14 @@ const state = {
   results: [],    // 푼 문항: [{ id, correct, usedHint }]
   answered: false,
   usedHint: false,
+  deadline: 0,
+  timerId: null,
 };
 
 const $ = (id) => document.getElementById(id);
 
 function showScreen(name) {
+  if (name !== "quiz") stopTimer();
   for (const section of document.querySelectorAll("main > section")) {
     section.hidden = section.id !== `screen-${name}`;
   }
@@ -141,6 +150,9 @@ function init() {
   $("mode-select").addEventListener("change", updatePracticeNote);
   $("hint-button").addEventListener("click", useHint);
   updatePracticeNote();
+  document.addEventListener("visibilitychange", () => {
+    if (!document.hidden && state.timerId !== null) tick();
+  });
   $("next-button").addEventListener("click", nextQuestion);
   $("home-button").addEventListener("click", () => showScreen("start"));
   showScreen("start");
@@ -199,11 +211,19 @@ function renderQuestion() {
     box.append(button);
   }
   $("feedback").hidden = true;
+  $("quiz-timer").hidden = state.mode !== "speed";
+  if (state.mode === "speed") startTimer();
 }
 
 function answer(choice) {
   if (state.answered) return; // 빠르게 두 번 눌러도 한 번만 기록
+  // 다른 탭에서 돌아와 아직 tick이 돌기 전에 누른 경우: 이미 마감이 지났으면 시간 초과
+  if (state.mode === "speed" && remainingSeconds(state.deadline, Date.now()) === 0) {
+    timeUp();
+    return;
+  }
   state.answered = true;
+  stopTimer();
   const item = state.items[state.index];
   const correct = choice === item.question.answer;
   recordResult(correct);
@@ -227,6 +247,35 @@ function useHint() {
   }
   state.usedHint = true;
   $("hint-button").disabled = true;
+}
+
+function startTimer() {
+  stopTimer();
+  state.deadline = Date.now() + SPEED_SECONDS * 1000;
+  tick();
+  state.timerId = setInterval(tick, 200);
+}
+
+function stopTimer() {
+  if (state.timerId !== null) {
+    clearInterval(state.timerId);
+    state.timerId = null;
+  }
+}
+
+function tick() {
+  const left = remainingSeconds(state.deadline, Date.now());
+  $("quiz-timer").textContent = `남은 시간 ${left}초`;
+  if (left === 0) timeUp();
+}
+
+function timeUp() {
+  if (state.answered) return;
+  state.answered = true;
+  stopTimer();
+  $("quiz-timer").textContent = "남은 시간 0초";
+  recordResult(false);
+  revealAnswer(null, "시간 초과");
 }
 
 // chosen이 null이면(시간 초과) 정답만 표시한다

@@ -147,3 +147,20 @@ test("pickHintRemovals: 오답 3개가 모두 남겨질 수 있다(무작위)", 
   }
   assert.deepEqual([...kept].sort(), ["가", "다", "라"]);
 });
+
+// ----- 2단계: 스피드 -----
+
+test("remainingSeconds: 마감까지 남은 시간을 올림한 정수 초로 돌려준다", () => {
+  const remaining = app("remainingSeconds");
+  const now = 1_000_000;
+  assert.equal(remaining(now + 15000, now), 15);
+  assert.equal(remaining(now + 14001, now), 15);
+  assert.equal(remaining(now + 14000, now), 14);
+  assert.equal(remaining(now + 1, now), 1);
+  assert.equal(remaining(now, now), 0);
+  assert.equal(remaining(now - 5000, now), 0); // 다른 탭에 오래 있다 돌아온 경우
+});
+
+test("SPEED_SECONDS는 15초다", () => {
+  assert.equal(app("SPEED_SECONDS"), 15);
+});
