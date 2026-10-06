@@ -54,3 +54,19 @@ button:disabled { cursor: default; }
 .score { font-size: 2em; font-weight: bold; margin: 8px 0; }
 .note { color: var(--muted); }
 .error { color: var(--bad); font-weight: bold; }
+
+.mode-list { display: grid; gap: 6px; }
+.mode-list label {
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+#hint-button { margin-left: auto; padding: 4px 14px; }
+#hint-button:disabled { opacity: 0.45; }
+
+/* 힌트로 지운 보기: 자리는 남기고 보이지 않게 한다 */
+.choice.removed { visibility: hidden; }
+
+.timer { font-weight: bold; color: var(--accent); }

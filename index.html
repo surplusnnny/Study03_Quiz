@@ -13,7 +13,13 @@
       <h1>상식 퀴즈</h1>
       <p id="data-error" class="error" hidden></p>
       <div id="start-body">
-        <p class="mode-desc"><strong>연습 모드</strong> — 시간 제한과 힌트 없이 풀고, 맞히면 1점입니다. <span class="note">순위표에 기록되지 않음</span></p>
+        <h2>모드</h2>
+        <div id="mode-select" class="mode-list">
+          <label><input type="radio" name="mode" value="practice" checked> <strong>연습</strong> — 시간 제한과 힌트 없이 풀고, 맞히면 1점</label>
+          <label><input type="radio" name="mode" value="speed"> <strong>스피드</strong> — 문항마다 15초, 시간이 다 되면 오답</label>
+          <label><input type="radio" name="mode" value="hint"> <strong>힌트</strong> — 문항마다 한 번 오답 2개를 지움, 힌트를 쓰고 맞히면 0.5점</label>
+        </div>
+        <p id="practice-note" class="note">순위표에 기록되지 않음</p>
         <h2>카테고리</h2>
         <div id="category-buttons" class="button-grid"></div>
       </div>
@@ -24,6 +30,8 @@
         <span id="quiz-category"></span>
         <span id="quiz-mode"></span>
         <span id="quiz-progress"></span>
+        <span id="quiz-timer" class="timer" hidden></span>
+        <button id="hint-button" type="button" hidden>힌트</button>
       </header>
       <h2 id="quiz-question"></h2>
       <div id="choices" class="choices"></div>
@@ -40,7 +48,9 @@
       <p id="result-score" class="score"></p>
       <p id="result-correct"></p>
       <p id="result-practice-note" class="note">순위표에 기록되지 않음</p>
+      <p id="retry-summary" hidden></p>
       <div class="actions">
+        <button id="retry-button" type="button" hidden>틀린 문제 다시 풀기</button>
         <button id="home-button" type="button">처음으로</button>
       </div>
     </section>
