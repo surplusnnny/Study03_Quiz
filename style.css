@@ -56,13 +56,9 @@ button:disabled { cursor: default; }
 .error { color: var(--bad); font-weight: bold; }
 
 .mode-list { display: grid; gap: 6px; }
-.mode-list label {
-  padding: 8px 12px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #fff;
-  cursor: pointer;
-}
+.mode-option { text-align: left; }
+.mode-option .note { display: block; font-size: 0.9em; }
+.student { margin: 0 0 8px; font-weight: bold; }
 #hint-button { margin-left: auto; padding: 4px 14px; }
 #hint-button:disabled { opacity: 0.45; }
 

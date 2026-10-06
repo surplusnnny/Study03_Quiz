@@ -155,10 +155,12 @@ function init() {
     return;
   }
   renderCategoryButtons(categories);
-  $("mode-select").addEventListener("change", updatePracticeNote);
+  for (const button of document.querySelectorAll(".mode-option")) {
+    button.addEventListener("click", () => startRound(state.category, button.dataset.mode));
+  }
+  $("mode-back-button").addEventListener("click", () => showScreen("start"));
   $("hint-button").addEventListener("click", useHint);
   $("retry-button").addEventListener("click", startRetry);
-  updatePracticeNote();
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden && state.timerId !== null) tick();
   });
@@ -174,13 +176,20 @@ function renderCategoryButtons(categories) {
     const button = document.createElement("button");
     button.type = "button";
     button.textContent = category;
-    button.addEventListener("click", () => startRound(category));
+    button.addEventListener("click", () => showModeSelect(category));
     box.append(button);
   }
 }
 
-function startRound(category) {
-  state.mode = selectedMode();
+// 카테고리를 고르면 모드 선택 화면으로 간다
+function showModeSelect(category) {
+  state.category = category;
+  $("mode-title").textContent = `${category} · 모드를 고르세요`;
+  showScreen("mode");
+}
+
+function startRound(category, mode) {
+  state.mode = mode;
   state.category = category;
   state.firstResult = null;
   beginRound(questionsOf(QUESTIONS, category), "first");
@@ -197,15 +206,6 @@ function beginRound(questions, round) {
   state.results = [];
   showScreen("quiz");
   renderQuestion();
-}
-
-function selectedMode() {
-  const checked = document.querySelector('input[name="mode"]:checked');
-  return checked ? checked.value : "practice";
-}
-
-function updatePracticeNote() {
-  $("practice-note").hidden = selectedMode() !== "practice";
 }
 
 function renderQuestion() {

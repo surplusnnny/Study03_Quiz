@@ -10,18 +10,24 @@
 <body>
   <main>
     <section id="screen-start">
+      <p class="student">학번 2401296 이름 박신우</p>
       <h1>상식 퀴즈</h1>
       <p id="data-error" class="error" hidden></p>
       <div id="start-body">
-        <h2>모드</h2>
-        <div id="mode-select" class="mode-list">
-          <label><input type="radio" name="mode" value="practice" checked> <strong>연습</strong> — 시간 제한과 힌트 없이 풀고, 맞히면 1점</label>
-          <label><input type="radio" name="mode" value="speed"> <strong>스피드</strong> — 문항마다 15초, 시간이 다 되면 오답</label>
-          <label><input type="radio" name="mode" value="hint"> <strong>힌트</strong> — 문항마다 한 번 오답 2개를 지움, 힌트를 쓰고 맞히면 0.5점</label>
-        </div>
-        <p id="practice-note" class="note">순위표에 기록되지 않음</p>
         <h2>카테고리</h2>
         <div id="category-buttons" class="button-grid"></div>
+      </div>
+    </section>
+
+    <section id="screen-mode" hidden>
+      <h2 id="mode-title"></h2>
+      <div id="mode-buttons" class="mode-list">
+        <button type="button" class="mode-option" data-mode="practice"><strong>연습</strong> 시간 제한과 힌트 없이 풀고, 맞히면 1점<span class="note">순위표에 기록되지 않음</span></button>
+        <button type="button" class="mode-option" data-mode="speed"><strong>스피드</strong> 문항마다 15초, 시간이 다 되면 오답</button>
+        <button type="button" class="mode-option" data-mode="hint"><strong>힌트</strong> 문항마다 한 번 오답 2개를 지움, 힌트를 쓰고 맞히면 0.5점</button>
+      </div>
+      <div class="actions">
+        <button id="mode-back-button" type="button">뒤로</button>
       </div>
     </section>
 
