@@ -19,7 +19,7 @@ test("해설은 한 줄이다", () => {
   for (const q of QUESTIONS) assert.ok(!/\n/.test(q.explanation), q.id);
 });
 
-test("'가장'을 쓴 문제는 기준을 적는다(PRD 6.2 규칙 3)", () => {
+test("'가장'을 쓴 문제는 기준을 적는다(CLAUDE.md 규칙 2)", () => {
   for (const q of QUESTIONS) {
     if (q.question.includes("가장")) assert.match(q.question, /기준/, q.id);
   }
