@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<!-- 생성: 2026-10-06 16:09 KST -->
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>상식 퀴즈</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <section id="screen-start">
+      <h1>상식 퀴즈</h1>
+      <p id="data-error" class="error" hidden></p>
+      <div id="start-body">
+        <p class="mode-desc"><strong>연습 모드</strong> — 시간 제한과 힌트 없이 풀고, 맞히면 1점입니다. <span class="note">순위표에 기록되지 않음</span></p>
+        <h2>카테고리</h2>
+        <div id="category-buttons" class="button-grid"></div>
+      </div>
+    </section>
+
+    <section id="screen-quiz" hidden>
+      <header class="quiz-header">
+        <span id="quiz-category"></span>
+        <span id="quiz-mode"></span>
+        <span id="quiz-progress"></span>
+      </header>
+      <h2 id="quiz-question"></h2>
+      <div id="choices" class="choices"></div>
+      <div id="feedback" hidden>
+        <p id="feedback-verdict" class="verdict"></p>
+        <p id="feedback-explanation"></p>
+        <p class="source">출처: <a id="feedback-source" target="_blank" rel="noopener"></a></p>
+        <button id="next-button" type="button">다음</button>
+      </div>
+    </section>
+
+    <section id="screen-result" hidden>
+      <h2>결과</h2>
+      <p id="result-score" class="score"></p>
+      <p id="result-correct"></p>
+      <p id="result-practice-note" class="note">순위표에 기록되지 않음</p>
+      <div class="actions">
+        <button id="home-button" type="button">처음으로</button>
+      </div>
+    </section>
+  </main>
+  <script src="questions.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
