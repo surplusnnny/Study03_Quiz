@@ -164,3 +164,25 @@ test("remainingSeconds: 마감까지 남은 시간을 올림한 정수 초로 �
 test("SPEED_SECONDS는 15초다", () => {
   assert.equal(app("SPEED_SECONDS"), 15);
 });
+
+// ----- 2단계: 다시 풀기 -----
+
+test("wrongQuestions: 틀린 문항 객체만 돌려준다", () => {
+  const wrongQuestions = app("wrongQuestions");
+  const qs = makeQuestions().slice(0, 3);
+  const items = qs.map((question) => ({ question, choices: question.choices }));
+  const results = [
+    { id: "history-01", correct: true, usedHint: false },
+    { id: "history-02", correct: false, usedHint: false },
+    { id: "history-03", correct: false, usedHint: false },
+  ];
+  assert.deepEqual(plain(wrongQuestions(items, results).map((q) => q.id)), ["history-02", "history-03"]);
+});
+
+test("wrongQuestions: 모두 맞히면 빈 배열", () => {
+  const wrongQuestions = app("wrongQuestions");
+  const qs = makeQuestions().slice(0, 2);
+  const items = qs.map((question) => ({ question, choices: question.choices }));
+  const results = qs.map((q) => ({ id: q.id, correct: true, usedHint: false }));
+  assert.equal(wrongQuestions(items, results).length, 0);
+});

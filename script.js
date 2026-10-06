@@ -109,10 +109,18 @@ function remainingSeconds(deadline, now) {
   return Math.max(0, Math.ceil((deadline - now) / 1000));
 }
 
+function wrongQuestions(items, results) {
+  const wrongIds = new Set(results.filter((r) => !r.correct).map((r) => r.id));
+  return items.map((item) => item.question).filter((q) => wrongIds.has(q.id));
+}
+
 // ===== 화면: 브라우저에서만 실행된다 =====
 
 const state = {
   mode: "practice",
+  round: "first",       // "first" | "retry"
+  firstResult: null,    // 처음 10문제 결과 { score, correct, total }
+  lastWrong: [],        // 직전 판에서 틀린 문항 객체
   category: null,
   items: [],      // 이번 판 문항: [{ question, choices }]
   index: 0,
@@ -149,6 +157,7 @@ function init() {
   renderCategoryButtons(categories);
   $("mode-select").addEventListener("change", updatePracticeNote);
   $("hint-button").addEventListener("click", useHint);
+  $("retry-button").addEventListener("click", startRetry);
   updatePracticeNote();
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden && state.timerId !== null) tick();
@@ -173,7 +182,17 @@ function renderCategoryButtons(categories) {
 function startRound(category) {
   state.mode = selectedMode();
   state.category = category;
-  state.items = buildRound(questionsOf(QUESTIONS, category));
+  state.firstResult = null;
+  beginRound(questionsOf(QUESTIONS, category), "first");
+}
+
+function startRetry() {
+  beginRound(state.lastWrong, "retry");
+}
+
+function beginRound(questions, round) {
+  state.round = round;
+  state.items = buildRound(questions);
   state.index = 0;
   state.results = [];
   showScreen("quiz");
@@ -313,11 +332,18 @@ function nextQuestion() {
 }
 
 function showResult() {
-  const score = totalScore(state.results);
   const correctCount = state.results.filter((r) => r.correct).length;
-  $("result-score").textContent = `${formatScore(score)} / ${QUESTIONS_PER_CATEGORY}점`;
-  $("result-correct").textContent = `${state.items.length}문제 중 ${correctCount}개 맞힘`;
+  if (state.round === "first") {
+    state.firstResult = { score: totalScore(state.results), correct: correctCount, total: state.items.length };
+  }
+  state.lastWrong = wrongQuestions(state.items, state.results);
+  const first = state.firstResult; // 다시 푼 판의 결과는 점수에 반영하지 않는다
+  $("result-score").textContent = `${formatScore(first.score)} / ${QUESTIONS_PER_CATEGORY}점`;
+  $("result-correct").textContent = `${first.total}문제 중 ${first.correct}개 맞힘`;
   $("result-practice-note").hidden = state.mode !== "practice";
+  $("retry-summary").hidden = state.round !== "retry";
+  $("retry-summary").textContent = `다시 푼 문제 ${state.items.length}개 중 ${correctCount}개 맞힘`;
+  $("retry-button").hidden = !(state.mode === "practice" && state.lastWrong.length > 0);
   showScreen("result");
 }
 
