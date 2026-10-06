@@ -945,7 +945,7 @@ Pages 주소에서 1단계 확인 항목 1~9를 다시 확인한다. 1단계 완
 - [ ] Pages 주소에 배포했다.
 
 **내가 브라우저에서 직접 확인할 항목** (`file://`와 Pages 주소 모두)
-1. 시작 화면 위쪽에 모드 3개와 규칙 한 줄씩이 있고, 연습을 고르면 "순위표에 기록되지 않음"이 보이며 스피드·힌트를 고르면 사라진다.
+1. 시작 화면에는 카테고리만 있고 "순위표에 기록되지 않음"이 없다. 카테고리를 누르면 모드 선택 화면에 연습·스피드·힌트와 규칙이 한 줄씩 나오고, 연습에만 "순위표에 기록되지 않음"이 붙는다. [뒤로]를 누르면 시작 화면으로 돌아간다(Task 9a에서 바꿈).
 2. 고른 모드 이름이 문제 화면 위쪽에 나온다. 어느 모드든 문제 화면에 점수는 없다.
 3. **힌트:** [힌트]를 누르면 오답 2개만 사라지고 정답과 오답 1개가 원래 자리에 남는다. 지운 자리는 비어 있다.
 4. **힌트:** [힌트]는 한 문항에 한 번만 눌린다. 답을 고른 뒤에도 눌리지 않는다. 다음 문항에서는 다시 눌린다.
@@ -1561,6 +1561,77 @@ Expected: `built`
 - [ ] **Step 4: Pages 주소에서 2단계 확인 항목 1~16을 모두 확인하고, 1단계 항목 3~9도 연습 모드로 다시 확인한다.**
 
 2단계 완료 기준을 모두 체크한다.
+
+
+---
+
+### Task 9a: 모드 선택 화면과 학번·이름 (과제 제출 요건, 2026-10-06 추가)
+
+교재 5.5.4.2와 과제 채점 기준은 "카테고리를 고르면 모드 선택 화면이 나오고, 시작 화면에는 '순위표에 기록되지 않음'이 없다"를 확인한다. Task 6에서 만든 시작 화면의 모드 라디오 버튼을 모드 선택 화면으로 옮겼다. 과제 요건에 따라 시작 화면 맨 위에 학번과 이름을 표시한다. 브랜치는 `stage-2-fix`.
+
+**Files:**
+- Modify: `index.html` (시작 화면에서 `mode-select`, `practice-note` 삭제, 학번·이름 줄 추가, `screen-mode` 추가)
+- Modify: `script.js` (`selectedMode`, `updatePracticeNote` 삭제, `showModeSelect` 추가, `startRound(category, mode)`)
+- Modify: `style.css` (`.mode-option`, `.student`)
+- Modify: `PRD.md` (화면 5개, 4.1a 모드 선택 화면, 12장)
+
+**Interfaces:**
+- Produces: `showModeSelect(category)`, `startRound(category, mode)`, `showScreen("mode")`, HTML id `screen-mode`, `mode-title`, `mode-buttons`, `mode-back-button`, 모드 버튼 `.mode-option[data-mode]`
+- 3단계(Task 12)는 `state.mode`와 `state.category`만 쓰므로 영향이 없다. Task 12 Step 1의 `category-buttons` 위치도 그대로다.
+
+시작 화면:
+
+```html
+<section id="screen-start">
+  <p class="student">학번 2401296 이름 박신우</p>
+  <h1>상식 퀴즈</h1>
+  <p id="data-error" class="error" hidden></p>
+  <div id="start-body">
+    <h2>카테고리</h2>
+    <div id="category-buttons" class="button-grid"></div>
+  </div>
+</section>
+
+<section id="screen-mode" hidden>
+  <h2 id="mode-title"></h2>
+  <div id="mode-buttons" class="mode-list">
+    <button type="button" class="mode-option" data-mode="practice"><strong>연습</strong> 시간 제한과 힌트 없이 풀고, 맞히면 1점<span class="note">순위표에 기록되지 않음</span></button>
+    <button type="button" class="mode-option" data-mode="speed"><strong>스피드</strong> 문항마다 15초, 시간이 다 되면 오답</button>
+    <button type="button" class="mode-option" data-mode="hint"><strong>힌트</strong> 문항마다 한 번 오답 2개를 지움, 힌트를 쓰고 맞히면 0.5점</button>
+  </div>
+  <div class="actions">
+    <button id="mode-back-button" type="button">뒤로</button>
+  </div>
+</section>
+```
+
+화면 코드:
+
+```js
+// init()
+for (const button of document.querySelectorAll(".mode-option")) {
+  button.addEventListener("click", () => startRound(state.category, button.dataset.mode));
+}
+$("mode-back-button").addEventListener("click", () => showScreen("start"));
+
+// 카테고리 버튼은 showModeSelect(category)를 부른다
+function showModeSelect(category) {
+  state.category = category;
+  $("mode-title").textContent = `${category} · 모드를 고르세요`;
+  showScreen("mode");
+}
+
+function startRound(category, mode) {
+  state.mode = mode;
+  state.category = category;
+  state.firstResult = null;
+  beginRound(questionsOf(QUESTIONS, category), "first");
+}
+```
+
+- [ ] `node --test` 통과(순수 함수는 바뀌지 않음)
+- [ ] 2단계 확인 항목 1~16을 다시 확인, 시작 화면 맨 위에 학번과 이름
+- [ ] `git merge --no-ff stage-2-fix`, 푸시, Pages 주소에서 강력 새로고침 뒤 확인
 
 ---
 
