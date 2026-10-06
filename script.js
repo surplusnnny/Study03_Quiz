@@ -97,6 +97,12 @@ function validateQuestions(categories, questions) {
   return problems;
 }
 
+// 오답 3개 중 무작위로 2개를 고른다
+function pickHintRemovals(choices, answer, random = Math.random) {
+  const wrong = choices.filter((c) => c !== answer);
+  return shuffle(wrong, random).slice(0, 2);
+}
+
 // ===== 화면: 브라우저에서만 실행된다 =====
 
 const state = {
@@ -106,6 +112,7 @@ const state = {
   index: 0,
   results: [],    // 푼 문항: [{ id, correct, usedHint }]
   answered: false,
+  usedHint: false,
 };
 
 const $ = (id) => document.getElementById(id);
@@ -131,6 +138,9 @@ function init() {
     return;
   }
   renderCategoryButtons(categories);
+  $("mode-select").addEventListener("change", updatePracticeNote);
+  $("hint-button").addEventListener("click", useHint);
+  updatePracticeNote();
   $("next-button").addEventListener("click", nextQuestion);
   $("home-button").addEventListener("click", () => showScreen("start"));
   showScreen("start");
@@ -149,6 +159,7 @@ function renderCategoryButtons(categories) {
 }
 
 function startRound(category) {
+  state.mode = selectedMode();
   state.category = category;
   state.items = buildRound(questionsOf(QUESTIONS, category));
   state.index = 0;
@@ -157,9 +168,21 @@ function startRound(category) {
   renderQuestion();
 }
 
+function selectedMode() {
+  const checked = document.querySelector('input[name="mode"]:checked');
+  return checked ? checked.value : "practice";
+}
+
+function updatePracticeNote() {
+  $("practice-note").hidden = selectedMode() !== "practice";
+}
+
 function renderQuestion() {
   const item = state.items[state.index];
   state.answered = false;
+  state.usedHint = false;
+  $("hint-button").hidden = state.mode !== "hint";
+  $("hint-button").disabled = false;
   $("quiz-category").textContent = state.category;
   $("quiz-mode").textContent = MODE_LABELS[state.mode];
   $("quiz-progress").textContent = `${state.index + 1} / ${state.items.length}`;
@@ -183,13 +206,33 @@ function answer(choice) {
   state.answered = true;
   const item = state.items[state.index];
   const correct = choice === item.question.answer;
-  state.results.push({ id: item.question.id, correct, usedHint: false });
+  recordResult(correct);
   revealAnswer(choice, correct ? "정답입니다" : "오답입니다");
+}
+
+function recordResult(correct) {
+  const item = state.items[state.index];
+  state.results.push({ id: item.question.id, correct, usedHint: state.usedHint });
+}
+
+function useHint() {
+  if (state.answered || state.usedHint) return;
+  const item = state.items[state.index];
+  const removed = pickHintRemovals(item.choices, item.question.answer);
+  for (const button of $("choices").children) {
+    if (removed.includes(button.dataset.choice)) {
+      button.classList.add("removed");
+      button.disabled = true;
+    }
+  }
+  state.usedHint = true;
+  $("hint-button").disabled = true;
 }
 
 // chosen이 null이면(시간 초과) 정답만 표시한다
 function revealAnswer(chosen, verdict) {
   const item = state.items[state.index];
+  $("hint-button").disabled = true;
   for (const button of $("choices").children) {
     button.disabled = true;
     const value = button.dataset.choice;

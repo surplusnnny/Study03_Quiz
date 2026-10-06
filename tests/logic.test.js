@@ -123,3 +123,27 @@ test("validateQuestions: CATEGORIES가 정해진 4개가 아니면 전체 오류
   const validate = app("validateQuestions");
   assert.ok(problemIds(validate(["한국사", "세계지리", "과학"], makeQuestions())).includes("(전체)"));
 });
+
+// ----- 2단계: 힌트 -----
+
+test("pickHintRemovals: 정답이 아닌 서로 다른 보기 2개를 고른다", () => {
+  const pick = app("pickHintRemovals");
+  const choices = ["가", "나", "다", "라"];
+  for (let i = 0; i < 100; i++) {
+    const removed = plain(pick(choices, "나"));
+    assert.equal(removed.length, 2);
+    assert.equal(new Set(removed).size, 2);
+    assert.ok(!removed.includes("나"));
+    assert.ok(removed.every((c) => choices.includes(c)));
+  }
+});
+
+test("pickHintRemovals: 오답 3개가 모두 남겨질 수 있다(무작위)", () => {
+  const pick = app("pickHintRemovals");
+  const kept = new Set();
+  for (let i = 0; i < 200; i++) {
+    const removed = pick(["가", "나", "다", "라"], "나");
+    for (const wrong of ["가", "다", "라"]) if (!removed.includes(wrong)) kept.add(wrong);
+  }
+  assert.deepEqual([...kept].sort(), ["가", "다", "라"]);
+});
